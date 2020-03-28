@@ -9,3 +9,8 @@ task hello{
         println 'Hello World'
     }
 }
+
+task copySrc(type: Copy, group: 'custom', description: 'Copies source to the dest directory') {
+    from('src')
+    into('dest')
+}
