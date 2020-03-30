@@ -4,13 +4,153 @@
  * This is a general purpose Gradle build.
  * Learn how to create Gradle builds at https://guides.gradle.org/creating-new-gradle-builds/
  */
-task hello{
-    doLast{
+
+
+buildscript {
+//    repositories {
+//        mavenCentral()
+//    }
+//    dependencies {
+//        classpath group: 'commons-codec', name: 'commons-codec', version: '1.2'
+//    }
+}
+
+plugins {
+    id 'base'
+}
+
+version = 'v0.0.1'
+
+
+
+task hello(group: 'learn') {
+    doLast {
         println 'Hello World'
+    }
+}
+
+task intro(group: 'learn') {
+    dependsOn hello
+    doLast {
+        println 'I am new here.'
     }
 }
 
 task copySrc(type: Copy, group: 'custom', description: 'Copies source to the dest directory') {
     from('src')
     into('dest')
+}
+
+task zipSrc(type: Zip, group: 'Archive', description: 'Archive source in a zip file') {
+    from 'src'
+    setArchiveName 'basic-demo-1.0.zip'
+}
+
+task upper(group: 'learn') {
+    doLast {
+        def name = 'mY_nAmE'
+        println "Original:$name"
+        println "Upper Case:${name.toUpperCase()}"
+    }
+}
+
+task countFour(group: 'learn') {
+    println('countFour')
+    doLast {
+        4.times {
+            print(it)
+        }
+    }
+}
+
+4.times { counter ->
+    task "task$counter"(group: 'learn') {
+        doLast {
+            print("I am task $counter")
+        }
+    }
+}
+
+task0.dependsOn task1, task2
+
+task helloEarth {
+    doLast {
+        println('Hello Earth')
+    }
+}
+
+helloEarth.doFirst {
+    println 'Hello Venus'
+}
+
+helloEarth.configure {
+    doLast {
+        println 'Hello Mars'
+    }
+}
+
+helloEarth.configure {
+    doLast {
+        println 'Hello Jupiter'
+    }
+}
+
+task helloWithExtraProperty(group: 'Learn') {
+    ext.firstName = 'Smith'
+}
+
+task showTaskProperty(group: 'Learn') {
+    doLast {
+        println helloWithExtraProperty.firstName
+    }
+}
+
+task loadFiles(group: 'Learn') {
+    doLast {
+        fileList('./dest').each { File file ->
+            ant.loadfile(srcFile: file, property: file.name)
+            println("*** $file.name ***")
+            println("${ant.properties[file.name]}")
+        }
+    }
+}
+
+task checksum(group: 'Learn') {
+    doLast {
+        fileList('./dest').each { file ->
+            def csPrefixFileName = "cs_$file.name"
+            ant.checksum(file: file, property: csPrefixFileName)
+            println "$file.name Checksum: ${ant.properties[csPrefixFileName]}"
+        }
+    }
+}
+
+File[] fileList (String dir) {
+    file(dir).listFiles({ file -> file.isFile() } as FileFilter).sort()
+}
+
+task defaultOne(group: 'Learn') {
+    doLast {
+        println 'Default Task run when no tasks are specified'
+    }
+}
+
+defaultTasks 'defaultOne'
+
+task distribution (group: 'Learn') {
+    doLast {
+        println "We build the zip with version=$version"
+    }
+}
+
+task release(group: 'Learn') {
+    dependsOn distribution
+    doLast {
+        println "We release now!"
+    }
+}
+gradle.taskGraph.whenReady { taskGraph ->
+    if(taskGraph.hasTask(':release')) {
+       version += '-release'
+    }
 }
