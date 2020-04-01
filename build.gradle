@@ -154,3 +154,32 @@ gradle.taskGraph.whenReady { taskGraph ->
        version += '-release'
     }
 }
+
+/*
+Authoring Tasks
+* */
+
+task('helloAgain', group: 'Learn') {
+    doLast {
+        println 'Hello World again!'
+    }
+}
+
+tasks.create('helloAgainAndAgain') {
+    doLast {
+        println 'Hello World again and Again!'
+    }
+}
+
+task accessTask (group: 'Learn') {
+    doLast {
+        println helloAgain.name
+        println tasks.getByName('helloAgain').name
+        println tasks.getByPath(':helloAgain').name
+    }
+}
+
+task copyFirst(group: 'Learn', type: Copy)
+copyFirst.from 'src'
+copyFirst.into 'dest'
+copyFirst.include('**/*.txt')
